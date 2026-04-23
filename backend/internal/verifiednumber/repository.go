@@ -2,6 +2,7 @@ package verifiednumber
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/cauco/trust-platform/backend/internal/phone"
@@ -94,11 +95,11 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 
 	var res LookupResponse
 	var verifiedNumberID int64
-	var reasonTitle *string
-	var reasonDescription *string
-	var reasonPriority *string
-	var reasonExpiresAt *time.Time
-	var lastSeenAt *time.Time
+	var reasonTitle sql.NullString
+	var reasonDescription sql.NullString
+	var reasonPriority sql.NullString
+	var reasonExpiresAt sql.NullTime
+	var lastSeenAt sql.NullTime
 
 	err := r.db.QueryRow(ctx, `
 		SELECT
@@ -172,12 +173,17 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	res.LookupCount = res.LookupCount + 1
 	res.LastSeenAt = timePtrNow()
 
-	if reasonTitle != nil && reasonDescription != nil && reasonPriority != nil {
+	if reasonTitle.Valid && reasonDescription.Valid && reasonPriority.Valid {
+		var expiresAt *time.Time
+		if reasonExpiresAt.Valid {
+			expiresAt = &reasonExpiresAt.Time
+		}
+
 		res.CallReason = &LookupCallReason{
-			Title:       *reasonTitle,
-			Description: *reasonDescription,
-			Priority:    *reasonPriority,
-			ExpiresAt:   reasonExpiresAt,
+			Title:       reasonTitle.String,
+			Description: reasonDescription.String,
+			Priority:    reasonPriority.String,
+			ExpiresAt:   expiresAt,
 		}
 	}
 

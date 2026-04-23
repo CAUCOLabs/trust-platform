@@ -2,6 +2,7 @@ package verifiednumber
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -62,7 +63,8 @@ func (h *Handler) LookupByPhoneNumber(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.repo.LookupByPhoneNumber(r.Context(), phoneNumber)
 	if err != nil {
-		http.Error(w, "failed to lookup phone number", http.StatusInternalServerError)
+		log.Printf("lookup failed for phone_number=%q: %v", phoneNumber, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

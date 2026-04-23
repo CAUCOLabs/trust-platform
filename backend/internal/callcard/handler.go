@@ -2,6 +2,7 @@ package callcard
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -22,7 +23,8 @@ func (h *Handler) GetCallCard(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.repo.Build(r.Context(), phoneNumber)
 	if err != nil {
-		http.Error(w, "failed to build call card", http.StatusInternalServerError)
+		log.Printf("call-card build failed for phone_number=%q: %v", phoneNumber, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

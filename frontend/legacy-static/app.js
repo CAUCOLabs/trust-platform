@@ -5,9 +5,11 @@ const lookupBtn = document.getElementById("lookupBtn");
 const reportSpamBtn = document.getElementById("reportSpamBtn");
 const statusEl = document.getElementById("status");
 const cardEl = document.getElementById("card");
+const notFoundBoxEl = document.getElementById("notFoundBox");
 
 const companyNameEl = document.getElementById("companyName");
 const riskLevelEl = document.getElementById("riskLevel");
+const summaryMessageEl = document.getElementById("summaryMessage");
 const phoneNumberEl = document.getElementById("phoneNumber");
 const labelEl = document.getElementById("label");
 const verifiedEl = document.getElementById("verified");
@@ -18,6 +20,7 @@ const reasonTitleEl = document.getElementById("reasonTitle");
 const reasonDescriptionEl = document.getElementById("reasonDescription");
 const priorityEl = document.getElementById("priority");
 const recommendationEl = document.getElementById("recommendation");
+const scoreFillEl = document.getElementById("scoreFill");
 
 let currentPhoneNumber = "";
 
@@ -33,12 +36,35 @@ function setBadge(level) {
   }
 }
 
+function setScoreBar(score, level) {
+  const safeScore = Math.max(0, Math.min(100, score || 0));
+  scoreFillEl.style.width = `${safeScore}%`;
+  scoreFillEl.className = "score-fill";
+  scoreFillEl.classList.add(level || "high");
+}
+
+function getSummaryMessage(data) {
+  if (!data.found) return "Caller not recognized";
+  if (data.risk_level === "low") return "Trusted verified caller";
+  if (data.risk_level === "medium") return "Use caution before responding";
+  return "This caller may be suspicious";
+}
+
+function renderNotFound(data) {
+  cardEl.classList.add("hidden");
+  notFoundBoxEl.classList.remove("hidden");
+  setStatus("Lookup completed.");
+}
+
 function renderCard(data) {
+  notFoundBoxEl.classList.add("hidden");
   cardEl.classList.remove("hidden");
 
   companyNameEl.textContent = data.company_name || "Unknown caller";
   setBadge(data.risk_level);
+  setScoreBar(data.trust_score, data.risk_level);
 
+  summaryMessageEl.textContent = getSummaryMessage(data);
   phoneNumberEl.textContent = data.phone_number || "-";
   labelEl.textContent = data.label || "-";
   verifiedEl.textContent = data.verified ? "Yes" : "No";
@@ -61,6 +87,7 @@ async function lookupPhone() {
   currentPhoneNumber = phoneNumber;
   setStatus("Looking up number...");
   cardEl.classList.add("hidden");
+  notFoundBoxEl.classList.add("hidden");
 
   try {
     const url = new URL(`${API_BASE}/call-card`);
@@ -72,8 +99,14 @@ async function lookupPhone() {
     }
 
     const data = await response.json();
+
+    if (!data.found) {
+      renderNotFound(data);
+      return;
+    }
+
     renderCard(data);
-    setStatus(data.found ? "Lookup completed." : "Number not found.");
+    setStatus("Lookup completed.");
   } catch (error) {
     setStatus("Could not fetch call card.");
     console.error(error);
