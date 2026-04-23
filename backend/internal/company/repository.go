@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cauco/trust-platform/backend/internal/phone"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -20,12 +21,13 @@ func (r *Repository) Create(ctx context.Context, req CreateCompanyRequest) (Comp
 	defer cancel()
 
 	var c Company
+	normalizedPhone := phone.Normalize(req.PhoneNumber)
 
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO companies (name, business_id, phone_number)
 		VALUES ($1, $2, $3)
 		RETURNING id, name, business_id, phone_number, verified, created_at, updated_at
-	`, req.Name, req.BusinessID, req.PhoneNumber).Scan(
+	`, req.Name, req.BusinessID, normalizedPhone).Scan(
 		&c.ID,
 		&c.Name,
 		&c.BusinessID,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/cauco/trust-platform/backend/internal/phone"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -20,12 +21,13 @@ func (r *Repository) Create(ctx context.Context, req CreateVerifiedNumberRequest
 	defer cancel()
 
 	var vn VerifiedNumber
+	normalizedPhone := phone.Normalize(req.PhoneNumber)
 
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO verified_numbers (company_id, phone_number, label)
 		VALUES ($1, $2, $3)
 		RETURNING id, company_id, phone_number, label, verified, created_at
-	`, req.CompanyID, req.PhoneNumber, req.Label).Scan(
+	`, req.CompanyID, normalizedPhone, req.Label).Scan(
 		&vn.ID,
 		&vn.CompanyID,
 		&vn.PhoneNumber,
@@ -76,6 +78,8 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	normalizedPhone := phone.Normalize(phoneNumber)
+
 	var res LookupResponse
 
 	err := r.db.QueryRow(ctx, `
@@ -88,7 +92,7 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 		FROM verified_numbers vn
 		INNER JOIN companies c ON c.id = vn.company_id
 		WHERE vn.phone_number = $1
-	`, phoneNumber).Scan(
+	`, normalizedPhone).Scan(
 		&res.PhoneNumber,
 		&res.CompanyID,
 		&res.CompanyName,
@@ -99,7 +103,7 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	if err == pgx.ErrNoRows {
 		return LookupResponse{
 			Found:       false,
-			PhoneNumber: phoneNumber,
+			PhoneNumber: normalizedPhone,
 			Verified:    false,
 		}, nil
 	}
