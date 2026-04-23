@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS verified_numbers (
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    phone_number TEXT NOT NULL UNIQUE,
+    label TEXT NOT NULL,
+    verified BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

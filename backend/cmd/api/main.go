@@ -10,6 +10,7 @@ import (
 	"github.com/cauco/trust-platform/backend/internal/company"
 	"github.com/cauco/trust-platform/backend/internal/config"
 	"github.com/cauco/trust-platform/backend/internal/database"
+	"github.com/cauco/trust-platform/backend/internal/verifiednumber"
 )
 
 type HealthResponse struct {
@@ -36,6 +37,13 @@ func main() {
 
 		mux.HandleFunc("POST /companies", companyHandler.CreateCompany)
 		mux.HandleFunc("GET /companies", companyHandler.ListCompanies)
+
+		verifiedNumberRepo := verifiednumber.NewRepository(db)
+		verifiedNumberHandler := verifiednumber.NewHandler(verifiedNumberRepo)
+
+		mux.HandleFunc("POST /verified-numbers", verifiedNumberHandler.CreateVerifiedNumber)
+		mux.HandleFunc("GET /verified-numbers", verifiedNumberHandler.ListVerifiedNumbers)
+		mux.HandleFunc("GET /lookup", verifiedNumberHandler.LookupByPhoneNumber)
 	}
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
