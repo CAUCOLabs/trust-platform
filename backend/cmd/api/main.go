@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cauco/trust-platform/backend/internal/callreason"
 	"github.com/cauco/trust-platform/backend/internal/company"
 	"github.com/cauco/trust-platform/backend/internal/config"
 	"github.com/cauco/trust-platform/backend/internal/database"
@@ -44,6 +45,12 @@ func main() {
 		mux.HandleFunc("POST /verified-numbers", verifiedNumberHandler.CreateVerifiedNumber)
 		mux.HandleFunc("GET /verified-numbers", verifiedNumberHandler.ListVerifiedNumbers)
 		mux.HandleFunc("GET /lookup", verifiedNumberHandler.LookupByPhoneNumber)
+
+		callReasonRepo := callreason.NewRepository(db)
+		callReasonHandler := callreason.NewHandler(callReasonRepo)
+
+		mux.HandleFunc("POST /call-reasons", callReasonHandler.CreateCallReason)
+		mux.HandleFunc("GET /call-reasons", callReasonHandler.ListCallReasons)
 	}
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
