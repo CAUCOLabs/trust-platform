@@ -1,21 +1,58 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/cauco/trust-platform/backend/internal/config"
+	"github.com/cauco/trust-platform/backend/internal/database"
 )
 
+type HealthResponse struct {
+	Status   string `json:"status"`
+	Database string `json:"database"`
+}
+
 func main() {
+	cfg := config.Load()
+
+	db, err := database.Connect(cfg)
+	if err != nil {
+		log.Printf("database connection failed: %v", err)
+	} else {
+		log.Println("database connected")
+		defer db.Close(context.Background())
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		response := HealthResponse{
+			Status:   "ok",
+			Database: "down",
+		}
+
+		if db != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+
+			if err := db.Ping(ctx); err == nil {
+				response.Database = "up"
+			}
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
+		_ = json.NewEncoder(w).Encode(response)
 	})
 
-	log.Println("API running on :8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	addr := ":" + cfg.AppPort
+	log.Printf("API running on %s", addr)
+
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
 }
