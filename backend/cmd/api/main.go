@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cauco/trust-platform/backend/internal/company"
 	"github.com/cauco/trust-platform/backend/internal/config"
 	"github.com/cauco/trust-platform/backend/internal/database"
 )
@@ -28,6 +29,14 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+
+	if db != nil {
+		companyRepo := company.NewRepository(db)
+		companyHandler := company.NewHandler(companyRepo)
+
+		mux.HandleFunc("POST /companies", companyHandler.CreateCompany)
+		mux.HandleFunc("GET /companies", companyHandler.ListCompanies)
+	}
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		response := HealthResponse{

@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS companies (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    business_id TEXT NOT NULL UNIQUE,
+    phone_number TEXT NOT NULL,
+    verified BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
