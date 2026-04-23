@@ -20,3 +20,11 @@ type CreateCallReasonRequest struct {
 	Priority    string  `json:"priority"`
 	ExpiresAt   *string `json:"expires_at,omitempty"`
 }
+
+type UpdateCallReasonRequest struct {
+	CompanyID   int64   `json:"company_id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Priority    string  `json:"priority"`
+	ExpiresAt   *string `json:"expires_at,omitempty"`
+}

@@ -12,6 +12,8 @@ interface AdminDataSectionProps<T> {
   loading: boolean
   error: string | null
   emptyMessage: string
+  statusMessage?: string | null
+  tableMaxHeightClassName?: string
   toolbar?: ReactNode
 }
 
@@ -25,6 +27,8 @@ export function AdminDataSection<T>({
   loading,
   error,
   emptyMessage,
+  statusMessage,
+  tableMaxHeightClassName,
   toolbar,
 }: AdminDataSectionProps<T>) {
   let content: ReactNode
@@ -34,7 +38,7 @@ export function AdminDataSection<T>({
       <div className="rounded-[28px] border border-slate-700/70 bg-slate-900/90 p-6">
         <div className="mb-4 flex items-center gap-3 text-sm uppercase tracking-[0.28em] text-sky-200">
           <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-sky-400" aria-hidden="true" />
-          Loading records
+          Loading workspace data
         </div>
         <div className="space-y-3 motion-safe:animate-pulse">
           <div className="h-12 rounded-2xl bg-slate-800" />
@@ -46,19 +50,19 @@ export function AdminDataSection<T>({
   } else if (error) {
     content = (
       <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 p-6 text-slate-300">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-rose-200/80">Request failed</p>
+        <p className="text-[11px] uppercase tracking-[0.28em] text-rose-200/80">Could not refresh this view</p>
         <p className="mt-3 text-base leading-7 text-slate-200">{error}</p>
       </div>
     )
   } else if (!rows.length) {
     content = (
       <div className="rounded-[28px] border border-slate-700/70 bg-slate-900/90 p-6">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">No records</p>
+        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Nothing to show yet</p>
         <p className="mt-3 text-base leading-7 text-slate-300">{emptyMessage}</p>
       </div>
     )
   } else {
-    content = <DataTable columns={columns} rows={rows} getRowKey={getRowKey} />
+    content = <DataTable columns={columns} rows={rows} getRowKey={getRowKey} maxHeightClassName={tableMaxHeightClassName} />
   }
 
   return (
@@ -71,6 +75,11 @@ export function AdminDataSection<T>({
         </div>
         {toolbar}
       </div>
+      {statusMessage ? (
+        <div className="mt-6 rounded-[24px] border border-emerald-500/20 bg-emerald-500/10 px-5 py-4 text-sm text-emerald-100">
+          {statusMessage}
+        </div>
+      ) : null}
       <div className="mt-6">{content}</div>
     </Panel>
   )

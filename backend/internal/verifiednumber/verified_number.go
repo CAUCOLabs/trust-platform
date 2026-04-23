@@ -17,6 +17,12 @@ type CreateVerifiedNumberRequest struct {
 	Label       string `json:"label"`
 }
 
+type UpdateVerifiedNumberRequest struct {
+	CompanyID   int64  `json:"company_id"`
+	PhoneNumber string `json:"phone_number"`
+	Label       string `json:"label"`
+}
+
 type LookupCallReason struct {
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
@@ -25,15 +31,17 @@ type LookupCallReason struct {
 }
 
 type LookupResponse struct {
-	Found       bool              `json:"found"`
-	PhoneNumber string            `json:"phone_number"`
-	CompanyID   int64             `json:"company_id,omitempty"`
-	CompanyName string            `json:"company_name,omitempty"`
-	Label       string            `json:"label,omitempty"`
-	Verified    bool              `json:"verified"`
-	SpamReports int               `json:"spam_reports"`
-	LookupCount int               `json:"lookup_count"`
-	LastSeenAt  *time.Time        `json:"last_seen_at,omitempty"`
-	TrustScore  int               `json:"trust_score"`
-	CallReason  *LookupCallReason `json:"call_reason,omitempty"`
+	Found            bool              `json:"found"`
+	PhoneNumber      string            `json:"phone_number"`
+	CompanyID        int64             `json:"company_id,omitempty"`
+	CompanyName      string            `json:"company_name,omitempty"`
+	Label            string            `json:"label,omitempty"`
+	Verified         bool              `json:"verified"`
+	SpamReports      int               `json:"spam_reports"`
+	LookupCount      int               `json:"lookup_count"`
+	LastSeenAt       *time.Time        `json:"last_seen_at,omitempty"`
+	TrustScore       int               `json:"trust_score"`
+	CallReason       *LookupCallReason `json:"call_reason,omitempty"`
+	VerifiedNumberID int64             `json:"-"`
+	CallReasonID     *int64            `json:"-"`
 }

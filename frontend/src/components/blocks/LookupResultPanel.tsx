@@ -15,10 +15,10 @@ export function LookupResultPanel({ loading, notFound, callCard, status, statusT
       <div className="mb-8 space-y-4">
         <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Result panel</p>
         <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Call card insights in a premium workspace.
+          Caller trust card.
         </h2>
         <p className="max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
-          Results appear here once the lookup returns. The layout is built for real API data and can expand smoothly with verified call metadata.
+          Lookup results stay focused on the caller, the risk level, and the safest next action.
         </p>
       </div>
 

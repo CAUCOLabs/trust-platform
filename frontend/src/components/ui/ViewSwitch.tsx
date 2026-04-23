@@ -7,8 +7,9 @@ interface ViewSwitchProps {
 }
 
 const options: Array<{ value: AppView; label: string; helper: string }> = [
-  { value: 'lookup', label: 'Lookup', helper: 'Public search flow' },
-  { value: 'admin', label: 'Admin', helper: 'Internal dashboard' },
+  { value: 'public', label: 'Public Website', helper: 'Product surface' },
+  { value: 'portal', label: 'Customer Portal', helper: 'Customer access' },
+  { value: 'internal', label: 'Internal Ops', helper: 'Protected console' },
 ]
 
 export function ViewSwitch({ value, onChange }: ViewSwitchProps) {

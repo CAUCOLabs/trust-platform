@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { cn } from '../../lib/utils'
 
 export interface DataTableColumn<T> {
   key: string
@@ -11,14 +12,18 @@ interface DataTableProps<T> {
   columns: Array<DataTableColumn<T>>
   rows: T[]
   getRowKey: (row: T) => string | number
+  maxHeightClassName?: string
 }
 
-export function DataTable<T>({ columns, rows, getRowKey }: DataTableProps<T>) {
+export function DataTable<T>({ columns, rows, getRowKey, maxHeightClassName }: DataTableProps<T>) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-slate-700/70 bg-slate-950/70">
-      <div className="overflow-x-auto">
+    <div className={cn('overflow-hidden rounded-[28px] border border-slate-700/70 bg-slate-950/70', maxHeightClassName && 'scroll-fade-shell')}>
+      <div
+        className={cn('premium-scrollbar overflow-auto focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-500/40', maxHeightClassName)}
+        tabIndex={0}
+      >
         <table className="min-w-full border-collapse text-left">
-          <thead className="bg-slate-900/95">
+          <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm">
             <tr>
               {columns.map((column) => (
                 <th

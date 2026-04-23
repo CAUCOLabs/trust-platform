@@ -5,6 +5,8 @@ interface AdminOverviewProps {
   companyCount: number
   verifiedNumberCount: number
   callReasonCount: number
+  callSessionCount: number
+  auditLogCount: number
 }
 
 function StatCard({ label, value, detail }: { label: string; value: number; detail: string }) {
@@ -26,35 +28,37 @@ function SidebarItem({ label, value }: { label: string; value: ReactNode }) {
   )
 }
 
-export function AdminOverview({ companyCount, verifiedNumberCount, callReasonCount }: AdminOverviewProps) {
+export function AdminOverview({ companyCount, verifiedNumberCount, callReasonCount, callSessionCount, auditLogCount }: AdminOverviewProps) {
   return (
     <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
       <Panel glow className="relative overflow-hidden px-6 py-8 sm:px-8 sm:py-10">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-sky-500/12 via-transparent to-transparent" />
         <div className="relative space-y-6">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Internal admin dashboard</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Console overview</p>
             <h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Live record inspection in the same premium workspace.
+              Operate the trusted caller registry.
             </h2>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300 sm:text-lg">
-              This view reads directly from the existing backend endpoints and keeps the public lookup journey separate.
+              Manage the data that powers public lookup, then monitor sessions, changes, and platform activity from one protected console.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <StatCard label="Companies" value={companyCount} detail="Registered company profiles available through the backend." />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <StatCard label="Companies" value={companyCount} detail="Organizations available for trusted caller matching." />
             <StatCard label="Verified Numbers" value={verifiedNumberCount} detail="Trusted phone numbers linked to companies." />
-            <StatCard label="Call Reasons" value={callReasonCount} detail="Operational reason records currently exposed by the API." />
+            <StatCard label="Call Reasons" value={callReasonCount} detail="Readable explanations for why a trusted caller may be calling." />
+            <StatCard label="Call Sessions" value={callSessionCount} detail="Recent lookup and call activity captured by the platform." />
+            <StatCard label="Audit Logs" value={auditLogCount} detail="Recent product operations recorded for traceability." />
           </div>
         </div>
       </Panel>
 
       <Panel className="p-6 sm:p-8">
-        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Admin notes</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Console scope</p>
         <div className="mt-5 grid gap-3">
-          <SidebarItem label="Mode" value="Read-only v1" />
-          <SidebarItem label="Data source" value="Live backend fetches from localhost:8080" />
-          <SidebarItem label="Scope" value="Companies, verified numbers, and call reasons" />
+          <SidebarItem label="Surface" value="Protected admin console" />
+          <SidebarItem label="Purpose" value="Operations, data management, sessions, audit, and analytics" />
+          <SidebarItem label="Public app" value="Lookup remains available outside the console" />
         </div>
       </Panel>
     </section>

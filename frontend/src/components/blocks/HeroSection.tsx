@@ -26,20 +26,20 @@ export function HeroSection({ phone, status, statusType, loading, onPhoneChange,
       <div className="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
         <div className="space-y-6">
           <p className="inline-flex rounded-full border border-slate-700/70 bg-slate-900/80 px-4 py-2 text-sm uppercase tracking-[0.3em] text-slate-400">
-            Trust Platform
+            Public caller check
           </p>
           <div className="space-y-4">
             <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-white sm:text-6xl">
-              High-trust caller intelligence for modern teams.
+              Check whether a caller is trusted.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
-              Lookup verified call records instantly and surface the risk profile you need to act with confidence.
+              Enter a phone number to see the caller, risk level, reason for calling, and trust signals from the verified registry.
             </p>
           </div>
         </div>
 
         <div className="rounded-[26px] border border-slate-700/80 bg-slate-900/90 p-6 shadow-2xl shadow-slate-950/40 sm:p-8">
-          <div className="mb-4 text-sm uppercase tracking-[0.28em] text-slate-500">Live lookup</div>
+          <div className="mb-4 text-sm uppercase tracking-[0.28em] text-slate-500">Number lookup</div>
           <div className="space-y-4">
             <Input
               value={phone}
@@ -53,10 +53,7 @@ export function HeroSection({ phone, status, statusType, loading, onPhoneChange,
               Lookup number
             </Button>
           </div>
-          <p className="mt-5 text-sm leading-6 text-slate-400">
-            The result panel updates after a real backend fetch. API requests use{' '}
-            <span className="font-medium text-slate-100">http://localhost:8080</span>.
-          </p>
+          <p className="mt-5 text-sm leading-6 text-slate-400">Results appear below as a call card with clear next actions.</p>
           <div className={`mt-6 rounded-3xl px-4 py-3 text-sm ring-1 transition-colors duration-200 ${statusStyles[statusType]}`} role="status" aria-live="polite">
             {status}
           </div>

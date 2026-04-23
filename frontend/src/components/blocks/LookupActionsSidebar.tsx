@@ -33,13 +33,13 @@ export function LookupActionsSidebar({
           Review the current risk signal alongside the caller recommendation before taking action.
         </p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Recommendation</p>
-            <p className="mt-2 text-sm font-medium text-slate-100">{callCard?.recommendation ?? 'Lookup required'}</p>
+          <div className="min-w-0 rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] leading-tight text-slate-500 whitespace-normal break-words">Recommendation</p>
+            <p className="mt-2 text-sm font-medium text-slate-100 break-words">{callCard?.recommendation ?? 'Lookup required'}</p>
           </div>
-          <div className="rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Priority</p>
-            <p className="mt-2 text-sm font-medium text-slate-100">{callCard?.priority ?? 'Normal priority'}</p>
+          <div className="min-w-0 rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3">
+            <p className="text-[10px] uppercase tracking-[0.18em] leading-tight text-slate-500 whitespace-normal break-words">Priority</p>
+            <p className="mt-2 text-sm font-medium text-slate-100 break-words">{callCard?.priority ?? 'Normal priority'}</p>
           </div>
         </div>
       </div>

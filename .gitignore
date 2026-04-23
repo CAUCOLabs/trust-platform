@@ -17,9 +17,12 @@ node_modules/
 dist/
 .vite/
 
+
 # IDE
 .vscode/
 .idea/
 
 # misc
 tmp/
+
+.gocache/

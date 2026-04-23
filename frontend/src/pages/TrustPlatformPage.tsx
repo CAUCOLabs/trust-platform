@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 import { lookupCallCard, reportSpam } from '../lib/api'
 import { CallCardData, StatusType } from '../lib/types'
-import { HeroSection } from '../components/blocks/HeroSection'
-import { PremiumFeatureSection } from '../components/blocks/PremiumFeatureSection'
 import { LookupResultPanel } from '../components/blocks/LookupResultPanel'
 import { LookupActionsSidebar } from '../components/blocks/LookupActionsSidebar'
+import {
+  BusinessValueSection,
+  DownloadCtaSection,
+  HowItWorksSection,
+  PublicHeroSection,
+  ReceiverExperienceSection,
+  SocialProofSection,
+  SupportSection,
+} from '../components/blocks/PublicProductSections'
 
 const defaultPhone = '+358401234567'
 
@@ -92,9 +99,9 @@ export default function TrustPlatformPage() {
   }
 
   return (
-    <main className="px-4 pb-10 pt-8 text-slate-100 sm:px-6 lg:px-10">
+    <main className="px-4 pb-12 text-slate-100 sm:px-6 lg:px-10">
       <div className="mx-auto flex max-w-7xl flex-col gap-8">
-        <HeroSection
+        <PublicHeroSection
           phone={phone}
           status={status}
           statusType={statusType}
@@ -102,7 +109,6 @@ export default function TrustPlatformPage() {
           onPhoneChange={setPhone}
           onLookup={handleLookup}
         />
-        <PremiumFeatureSection phone={phone} loading={loading} onPhoneChange={setPhone} onLookup={handleLookup} />
 
         <section className="grid gap-8 xl:grid-cols-[1.4fr_0.6fr]">
           <LookupResultPanel loading={loading} notFound={notFound} callCard={callCard} status={status} statusType={statusType} />
@@ -115,6 +121,13 @@ export default function TrustPlatformPage() {
             onReportSpam={handleReportSpam}
           />
         </section>
+
+        <HowItWorksSection />
+        <ReceiverExperienceSection />
+        <BusinessValueSection />
+        <SocialProofSection />
+        <DownloadCtaSection />
+        <SupportSection />
       </div>
     </main>
   )
