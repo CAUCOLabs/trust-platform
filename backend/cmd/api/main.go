@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cauco/trust-platform/backend/internal/callcard"
 	"github.com/cauco/trust-platform/backend/internal/callreason"
 	"github.com/cauco/trust-platform/backend/internal/company"
 	"github.com/cauco/trust-platform/backend/internal/config"
@@ -52,6 +53,11 @@ func main() {
 
 		mux.HandleFunc("POST /call-reasons", callReasonHandler.CreateCallReason)
 		mux.HandleFunc("GET /call-reasons", callReasonHandler.ListCallReasons)
+
+		callCardRepo := callcard.NewRepository(verifiedNumberRepo)
+		callCardHandler := callcard.NewHandler(callCardRepo)
+
+		mux.HandleFunc("GET /call-card", callCardHandler.GetCallCard)
 	}
 
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
