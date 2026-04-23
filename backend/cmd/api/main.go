@@ -45,6 +45,7 @@ func main() {
 		mux.HandleFunc("POST /verified-numbers", verifiedNumberHandler.CreateVerifiedNumber)
 		mux.HandleFunc("GET /verified-numbers", verifiedNumberHandler.ListVerifiedNumbers)
 		mux.HandleFunc("GET /lookup", verifiedNumberHandler.LookupByPhoneNumber)
+		mux.HandleFunc("POST /report-spam", verifiedNumberHandler.ReportSpam)
 
 		callReasonRepo := callreason.NewRepository(db)
 		callReasonHandler := callreason.NewHandler(callReasonRepo)

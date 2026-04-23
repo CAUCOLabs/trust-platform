@@ -35,8 +35,20 @@ func (r *Repository) Create(ctx context.Context, req CreateVerifiedNumberRequest
 		&vn.Verified,
 		&vn.CreatedAt,
 	)
+	if err != nil {
+		return VerifiedNumber{}, err
+	}
 
-	return vn, err
+	_, err = r.db.Exec(ctx, `
+		INSERT INTO number_signals (verified_number_id, spam_reports, lookup_count, trust_score, updated_at)
+		VALUES ($1, 0, 0, 100, NOW())
+		ON CONFLICT (verified_number_id) DO NOTHING
+	`, vn.ID)
+	if err != nil {
+		return VerifiedNumber{}, err
+	}
+
+	return vn, nil
 }
 
 func (r *Repository) List(ctx context.Context) ([]VerifiedNumber, error) {
@@ -81,24 +93,32 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	normalizedPhone := phone.Normalize(phoneNumber)
 
 	var res LookupResponse
+	var verifiedNumberID int64
 	var reasonTitle *string
 	var reasonDescription *string
 	var reasonPriority *string
 	var reasonExpiresAt *time.Time
+	var lastSeenAt *time.Time
 
 	err := r.db.QueryRow(ctx, `
 		SELECT
+			vn.id,
 			vn.phone_number,
 			vn.company_id,
 			c.name,
 			vn.label,
 			vn.verified,
+			COALESCE(ns.spam_reports, 0),
+			COALESCE(ns.lookup_count, 0),
+			ns.last_seen_at,
+			COALESCE(ns.trust_score, 100),
 			cr.title,
 			cr.description,
 			cr.priority,
 			cr.expires_at
 		FROM verified_numbers vn
 		INNER JOIN companies c ON c.id = vn.company_id
+		LEFT JOIN number_signals ns ON ns.verified_number_id = vn.id
 		LEFT JOIN call_reasons cr
 			ON cr.company_id = c.id
 			AND cr.active = TRUE
@@ -107,11 +127,16 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 		ORDER BY cr.id DESC
 		LIMIT 1
 	`, normalizedPhone).Scan(
+		&verifiedNumberID,
 		&res.PhoneNumber,
 		&res.CompanyID,
 		&res.CompanyName,
 		&res.Label,
 		&res.Verified,
+		&res.SpamReports,
+		&res.LookupCount,
+		&lastSeenAt,
+		&res.TrustScore,
 		&reasonTitle,
 		&reasonDescription,
 		&reasonPriority,
@@ -130,7 +155,22 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 		return LookupResponse{}, err
 	}
 
+	_, err = r.db.Exec(ctx, `
+		INSERT INTO number_signals (verified_number_id, spam_reports, lookup_count, last_seen_at, trust_score, updated_at)
+		VALUES ($1, 0, 1, NOW(), 100, NOW())
+		ON CONFLICT (verified_number_id)
+		DO UPDATE SET
+			lookup_count = number_signals.lookup_count + 1,
+			last_seen_at = NOW(),
+			updated_at = NOW()
+	`, verifiedNumberID)
+	if err != nil {
+		return LookupResponse{}, err
+	}
+
 	res.Found = true
+	res.LookupCount = res.LookupCount + 1
+	res.LastSeenAt = timePtrNow()
 
 	if reasonTitle != nil && reasonDescription != nil && reasonPriority != nil {
 		res.CallReason = &LookupCallReason{
@@ -142,4 +182,29 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	}
 
 	return res, nil
+}
+
+func (r *Repository) ReportSpam(ctx context.Context, phoneNumber string) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	normalizedPhone := phone.Normalize(phoneNumber)
+
+	_, err := r.db.Exec(ctx, `
+		UPDATE number_signals ns
+		SET
+			spam_reports = ns.spam_reports + 1,
+			trust_score = GREATEST(0, ns.trust_score - 20),
+			updated_at = NOW()
+		FROM verified_numbers vn
+		WHERE ns.verified_number_id = vn.id
+		  AND vn.phone_number = $1
+	`, normalizedPhone)
+
+	return err
+}
+
+func timePtrNow() *time.Time {
+	now := time.Now()
+	return &now
 }

@@ -31,5 +31,9 @@ type LookupResponse struct {
 	CompanyName string            `json:"company_name,omitempty"`
 	Label       string            `json:"label,omitempty"`
 	Verified    bool              `json:"verified"`
+	SpamReports int               `json:"spam_reports"`
+	LookupCount int               `json:"lookup_count"`
+	LastSeenAt  *time.Time        `json:"last_seen_at,omitempty"`
+	TrustScore  int               `json:"trust_score"`
 	CallReason  *LookupCallReason `json:"call_reason,omitempty"`
 }

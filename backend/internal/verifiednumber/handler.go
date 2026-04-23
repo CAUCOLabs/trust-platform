@@ -9,6 +9,10 @@ type Handler struct {
 	repo *Repository
 }
 
+type ReportSpamRequest struct {
+	PhoneNumber string `json:"phone_number"`
+}
+
 func NewHandler(repo *Repository) *Handler {
 	return &Handler{repo: repo}
 }
@@ -65,4 +69,26 @@ func (h *Handler) LookupByPhoneNumber(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(result)
+}
+
+func (h *Handler) ReportSpam(w http.ResponseWriter, r *http.Request) {
+	var req ReportSpamRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid json body", http.StatusBadRequest)
+		return
+	}
+
+	if req.PhoneNumber == "" {
+		http.Error(w, "phone_number is required", http.StatusBadRequest)
+		return
+	}
+
+	err := h.repo.ReportSpam(r.Context(), req.PhoneNumber)
+	if err != nil {
+		http.Error(w, "failed to report spam", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
