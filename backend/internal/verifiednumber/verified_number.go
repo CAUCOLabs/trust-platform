@@ -17,11 +17,19 @@ type CreateVerifiedNumberRequest struct {
 	Label       string `json:"label"`
 }
 
+type LookupCallReason struct {
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Priority    string     `json:"priority"`
+	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
+}
+
 type LookupResponse struct {
-	Found       bool   `json:"found"`
-	PhoneNumber string `json:"phone_number"`
-	CompanyID   int64  `json:"company_id,omitempty"`
-	CompanyName string `json:"company_name,omitempty"`
-	Label       string `json:"label,omitempty"`
-	Verified    bool   `json:"verified"`
+	Found       bool              `json:"found"`
+	PhoneNumber string            `json:"phone_number"`
+	CompanyID   int64             `json:"company_id,omitempty"`
+	CompanyName string            `json:"company_name,omitempty"`
+	Label       string            `json:"label,omitempty"`
+	Verified    bool              `json:"verified"`
+	CallReason  *LookupCallReason `json:"call_reason,omitempty"`
 }

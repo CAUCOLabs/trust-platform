@@ -81,6 +81,10 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	normalizedPhone := phone.Normalize(phoneNumber)
 
 	var res LookupResponse
+	var reasonTitle *string
+	var reasonDescription *string
+	var reasonPriority *string
+	var reasonExpiresAt *time.Time
 
 	err := r.db.QueryRow(ctx, `
 		SELECT
@@ -88,16 +92,30 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 			vn.company_id,
 			c.name,
 			vn.label,
-			vn.verified
+			vn.verified,
+			cr.title,
+			cr.description,
+			cr.priority,
+			cr.expires_at
 		FROM verified_numbers vn
 		INNER JOIN companies c ON c.id = vn.company_id
+		LEFT JOIN call_reasons cr
+			ON cr.company_id = c.id
+			AND cr.active = TRUE
+			AND (cr.expires_at IS NULL OR cr.expires_at > NOW())
 		WHERE vn.phone_number = $1
+		ORDER BY cr.id DESC
+		LIMIT 1
 	`, normalizedPhone).Scan(
 		&res.PhoneNumber,
 		&res.CompanyID,
 		&res.CompanyName,
 		&res.Label,
 		&res.Verified,
+		&reasonTitle,
+		&reasonDescription,
+		&reasonPriority,
+		&reasonExpiresAt,
 	)
 
 	if err == pgx.ErrNoRows {
@@ -113,5 +131,15 @@ func (r *Repository) LookupByPhoneNumber(ctx context.Context, phoneNumber string
 	}
 
 	res.Found = true
+
+	if reasonTitle != nil && reasonDescription != nil && reasonPriority != nil {
+		res.CallReason = &LookupCallReason{
+			Title:       *reasonTitle,
+			Description: *reasonDescription,
+			Priority:    *reasonPriority,
+			ExpiresAt:   reasonExpiresAt,
+		}
+	}
+
 	return res, nil
 }
