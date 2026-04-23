@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trust Platform</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Trust Platform</h1>
+    <p class="subtitle">Lookup verified call information</p>
+
+    <section class="search-box">
+      <input
+        id="phoneInput"
+        type="text"
+        placeholder="+358401234567"
+        value="+358401234567"
+      />
+      <button id="lookupBtn">Lookup</button>
+    </section>
+
+    <section id="status" class="status"></section>
+
+    <section id="card" class="card hidden">
+      <div class="card-header">
+        <h2 id="companyName">Unknown</h2>
+        <span id="riskLevel" class="badge">unknown</span>
+      </div>
+
+      <div class="card-grid">
+        <div>
+          <span class="label">Phone</span>
+          <p id="phoneNumber">-</p>
+        </div>
+        <div>
+          <span class="label">Label</span>
+          <p id="label">-</p>
+        </div>
+        <div>
+          <span class="label">Verified</span>
+          <p id="verified">-</p>
+        </div>
+        <div>
+          <span class="label">Trust score</span>
+          <p id="trustScore">-</p>
+        </div>
+        <div>
+          <span class="label">Spam reports</span>
+          <p id="spamReports">-</p>
+        </div>
+        <div>
+          <span class="label">Lookup count</span>
+          <p id="lookupCount">-</p>
+        </div>
+      </div>
+
+      <div class="reason-box">
+        <h3>Reason</h3>
+        <p id="reasonTitle">-</p>
+        <p id="reasonDescription">-</p>
+        <p><strong>Priority:</strong> <span id="priority">-</span></p>
+      </div>
+
+      <div class="recommendation-box">
+        <h3>Recommendation</h3>
+        <p id="recommendation">-</p>
+      </div>
+
+      <div class="actions">
+        <button id="reportSpamBtn" class="danger">Report spam</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
