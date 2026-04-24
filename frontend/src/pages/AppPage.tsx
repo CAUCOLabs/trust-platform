@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { AppNavigation } from '../components/blocks/AppNavigation'
-import { clearAdminToken, getStoredAdminToken, logoutAdmin, validateAdminSession } from '../lib/api'
-import type { AdminSession, AppView } from '../lib/types'
+import {
+  clearAdminToken,
+  clearPortalToken,
+  getStoredAdminToken,
+  getStoredPortalToken,
+  logoutAdmin,
+  logoutPortal,
+  validateAdminSession,
+  validatePortalSession,
+} from '../lib/api'
+import type { AdminSession, AppView, PortalSession } from '../lib/types'
 import AdminDashboardPage from './AdminDashboardPage'
 import AdminLoginPage from './AdminLoginPage'
 import CustomerPortalPage from './CustomerPortalPage'
@@ -27,7 +36,9 @@ function viewFromLocation(): AppView {
 export default function AppPage() {
   const [activeView, setActiveView] = useState<AppView>(viewFromLocation)
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null)
+  const [portalSession, setPortalSession] = useState<PortalSession | null>(null)
   const [authChecking, setAuthChecking] = useState(Boolean(getStoredAdminToken()))
+  const [portalAuthChecking, setPortalAuthChecking] = useState(Boolean(getStoredPortalToken()))
 
   useEffect(() => {
     let cancelled = false
@@ -63,6 +74,39 @@ export default function AppPage() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+
+    async function restorePortalSession() {
+      if (!getStoredPortalToken()) {
+        setPortalAuthChecking(false)
+        return
+      }
+
+      try {
+        const session = await validatePortalSession()
+        if (!cancelled) {
+          setPortalSession(session)
+        }
+      } catch {
+        clearPortalToken()
+        if (!cancelled) {
+          setPortalSession(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setPortalAuthChecking(false)
+        }
+      }
+    }
+
+    void restorePortalSession()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
     function handlePopState() {
       setActiveView(viewFromLocation())
     }
@@ -83,11 +127,23 @@ export default function AppPage() {
     navigateToView('public')
   }
 
+  async function handlePortalLogout() {
+    await logoutPortal()
+    setPortalSession(null)
+    window.history.pushState(null, '', '/portal')
+    setActiveView('portal')
+  }
+
   const activePage =
     activeView === 'public' ? (
       <TrustPlatformPage />
     ) : activeView === 'portal' ? (
-      <CustomerPortalPage />
+      <CustomerPortalPage
+        session={portalSession}
+        authChecking={portalAuthChecking}
+        onLogin={setPortalSession}
+        onLogout={() => void handlePortalLogout()}
+      />
     ) : adminSession ? (
       <AdminDashboardPage />
     ) : (
@@ -99,9 +155,11 @@ export default function AppPage() {
       <AppNavigation
         activeView={activeView}
         adminSession={adminSession}
+        portalSession={portalSession}
         authChecking={authChecking}
         onChangeView={navigateToView}
         onLogout={() => void handleLogout()}
+        onPortalLogout={() => void handlePortalLogout()}
       />
       {activePage}
     </div>

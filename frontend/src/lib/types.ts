@@ -1,6 +1,7 @@
 export type RiskLevel = 'low' | 'medium' | 'high'
 export type StatusType = 'idle' | 'loading' | 'success' | 'error' | 'info'
 export type AppView = 'public' | 'portal' | 'internal'
+export type AccountType = 'personal' | 'business'
 
 export interface AdminSession {
   username: string
@@ -12,6 +13,38 @@ export interface AdminLoginResponse {
   token: string
   session: AdminSession
   expires_at: string
+}
+
+export interface PortalCompanySummary {
+  id: number
+  name: string
+  business_id: string
+  phone_number: string
+  verified: boolean
+  verified_number_count: number
+  active_call_reason_count: number
+}
+
+export interface PortalAccount {
+  id: number
+  account_type: AccountType
+  email: string
+  full_name: string
+  phone_number: string
+  company?: PortalCompanySummary
+  created_at: string
+}
+
+export interface PortalSession {
+  token: string
+  account: PortalAccount
+  expires_at: string
+}
+
+export interface PortalBusinessWorkspace {
+  company: Company
+  verified_numbers: VerifiedNumber[]
+  call_reasons: CallReason[]
 }
 
 export interface CallCardData {

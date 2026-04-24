@@ -7,18 +7,46 @@ interface LookupResultPanelProps {
   callCard: CallCardData | null
   status: string
   statusType: StatusType
+  isLiveResult: boolean
+  scenario: {
+    eyebrow: string
+    title: string
+    detail: string
+    outcomeLabel: string
+    meaning: string
+    nextStep: string
+  }
 }
 
-export function LookupResultPanel({ loading, notFound, callCard, status, statusType }: LookupResultPanelProps) {
+const toneStyles: Record<StatusType, string> = {
+  idle: 'border-slate-700/70 bg-slate-900/80 text-slate-300',
+  loading: 'border-sky-500/20 bg-sky-500/10 text-sky-100',
+  success: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-100',
+  error: 'border-rose-500/20 bg-rose-500/10 text-rose-100',
+  info: 'border-amber-500/20 bg-amber-500/10 text-amber-100',
+}
+
+export function LookupResultPanel({
+  loading,
+  notFound,
+  callCard,
+  status,
+  statusType,
+  isLiveResult,
+  scenario,
+}: LookupResultPanelProps) {
   return (
     <div className="rounded-[36px] border border-slate-700/60 bg-slate-950/80 p-8 shadow-[0_40px_120px_-60px_rgba(15,23,42,0.9)] sm:p-10">
       <div className="mb-8 space-y-4">
-        <p className="text-sm uppercase tracking-[0.35em] text-slate-500">Result panel</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm uppercase tracking-[0.35em] text-slate-500">{isLiveResult ? 'Live registry result' : 'Guided scenario result'}</p>
+          <span className={`rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.24em] ${toneStyles[statusType]}`}>{scenario.outcomeLabel}</span>
+        </div>
         <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Caller trust card.
+          {isLiveResult ? 'Caller trust card.' : scenario.title}
         </h2>
         <p className="max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
-          Lookup results stay focused on the caller, the risk level, and the safest next action.
+          {isLiveResult ? 'Live lookups stay focused on the caller, the risk level, and the safest next action.' : scenario.detail}
         </p>
       </div>
 
@@ -42,37 +70,49 @@ export function LookupResultPanel({ loading, notFound, callCard, status, statusT
           </div>
         ) : statusType === 'error' ? (
           <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 p-10 text-slate-300 transition-all duration-300">
-            <p className="text-xs uppercase tracking-[0.3em] text-rose-200/80">Lookup error</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-rose-200/80">{isLiveResult ? 'Lookup error' : scenario.eyebrow}</p>
             <h3 className="mt-4 text-3xl font-semibold text-white">We couldn't load caller insights</h3>
             <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">{status}</p>
           </div>
         ) : notFound ? (
           <div className="rounded-[28px] border border-slate-700/70 bg-gradient-to-br from-slate-950 via-slate-900/95 to-slate-950 p-10 text-slate-300 transition-all duration-300">
-            <div className="inline-flex rounded-full border border-slate-700/70 bg-slate-900/80 px-4 py-2 text-xs uppercase tracking-[0.3em] text-slate-400">
-              No verified record
+            <div className={`inline-flex rounded-full border px-4 py-2 text-xs uppercase tracking-[0.3em] ${toneStyles[statusType]}`}>
+              {scenario.outcomeLabel}
             </div>
             <h3 className="mt-6 text-3xl font-semibold text-white">No caller profile is available yet</h3>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
-              No verified call record is currently available for this phone number. Continue with caution, or ask the caller to identify themselves.
+              {status}
             </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-slate-700/70 bg-slate-950/70 px-4 py-4">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Status</p>
-                <p className="mt-2 text-sm font-medium text-slate-100">No match in verified records</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">What this means</p>
+                <p className="mt-2 text-sm font-medium text-slate-100">{scenario.meaning}</p>
               </div>
               <div className="rounded-2xl border border-slate-700/70 bg-slate-950/70 px-4 py-4">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Next step</p>
-                <p className="mt-2 text-sm font-medium text-slate-100">Re-run lookup or verify the caller directly</p>
+                <p className="mt-2 text-sm font-medium text-slate-100">{scenario.nextStep}</p>
               </div>
             </div>
           </div>
         ) : callCard ? (
-          <div className="transition-all duration-300">
+          <div className="space-y-5 transition-all duration-300">
+            {!isLiveResult ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[24px] border border-slate-700/70 bg-slate-950/75 px-5 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">What this means</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{scenario.meaning}</p>
+                </div>
+                <div className="rounded-[24px] border border-slate-700/70 bg-slate-950/75 px-5 py-4">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">Why it matters</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{status}</p>
+                </div>
+              </div>
+            ) : null}
             <CallCard data={callCard} />
           </div>
         ) : (
           <div className="rounded-[28px] border border-slate-700/70 bg-slate-900/90 p-10 text-slate-400 transition-all duration-300">
-            <p className="text-lg leading-8">Enter a phone number and tap lookup to reveal verified caller insights.</p>
+            <p className="text-lg leading-8">Choose a guided scenario or run a live lookup to reveal caller insights.</p>
           </div>
         )}
       </div>

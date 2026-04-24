@@ -15,6 +15,7 @@ import (
 	"github.com/cauco/trust-platform/backend/internal/company"
 	"github.com/cauco/trust-platform/backend/internal/config"
 	"github.com/cauco/trust-platform/backend/internal/database"
+	"github.com/cauco/trust-platform/backend/internal/portalauth"
 	"github.com/cauco/trust-platform/backend/internal/verifiednumber"
 )
 
@@ -31,6 +32,9 @@ func main() {
 		log.Printf("database connection failed: %v", err)
 	} else {
 		log.Println("database connected")
+		if err := database.ApplyMigrations(db); err != nil {
+			log.Fatalf("failed to apply migrations: %v", err)
+		}
 		defer db.Close()
 	}
 
@@ -44,6 +48,18 @@ func main() {
 	if db != nil {
 		auditLogRepo := auditlog.NewRepository(db)
 		auditLogHandler := auditlog.NewHandler(auditLogRepo)
+		portalAuthRepo := portalauth.NewRepository(db, auditLogRepo, 14*24*time.Hour)
+		portalAuthHandler := portalauth.NewHandler(portalAuthRepo)
+
+		mux.HandleFunc("POST /portal/auth/signup/personal", portalAuthHandler.SignUpPersonal)
+		mux.HandleFunc("POST /portal/auth/signup/business", portalAuthHandler.SignUpBusiness)
+		mux.HandleFunc("POST /portal/auth/login", portalAuthHandler.SignIn)
+		mux.HandleFunc("GET /portal/auth/me", portalAuthHandler.RequirePortal(portalAuthHandler.Me))
+		mux.HandleFunc("POST /portal/auth/logout", portalAuthHandler.RequirePortal(portalAuthHandler.Logout))
+		mux.HandleFunc("GET /portal/business/workspace", portalAuthHandler.RequirePortal(portalAuthHandler.BusinessWorkspace))
+		mux.HandleFunc("PUT /portal/business/company", portalAuthHandler.RequirePortal(portalAuthHandler.UpdateBusinessCompany))
+		mux.HandleFunc("POST /portal/business/verified-numbers", portalAuthHandler.RequirePortal(portalAuthHandler.CreateBusinessVerifiedNumber))
+		mux.HandleFunc("POST /portal/business/call-reasons", portalAuthHandler.RequirePortal(portalAuthHandler.CreateBusinessCallReason))
 
 		companyRepo := company.NewRepository(db, auditLogRepo)
 		companyHandler := company.NewHandler(companyRepo)

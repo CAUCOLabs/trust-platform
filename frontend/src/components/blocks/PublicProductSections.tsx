@@ -4,10 +4,21 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 
 interface PublicHeroSectionProps {
+  selectedScenario: string
+  scenarios: Array<{
+    key: string
+    eyebrow: string
+    title: string
+    detail: string
+    phone: string
+    outcomeLabel: string
+    statusType: StatusType
+  }>
   phone: string
   status: string
   statusType: StatusType
   loading: boolean
+  onSelectScenario: (key: string) => void
   onPhoneChange: (value: string) => void
   onLookup: () => Promise<void>
 }
@@ -73,7 +84,17 @@ function MobileAppMockup() {
   )
 }
 
-export function PublicHeroSection({ phone, status, statusType, loading, onPhoneChange, onLookup }: PublicHeroSectionProps) {
+export function PublicHeroSection({
+  selectedScenario,
+  scenarios,
+  phone,
+  status,
+  statusType,
+  loading,
+  onSelectScenario,
+  onPhoneChange,
+  onLookup,
+}: PublicHeroSectionProps) {
   return (
     <section className="grid min-h-[calc(100vh-5rem)] gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-16">
       <div className="space-y-8">
@@ -105,22 +126,106 @@ export function PublicHeroSection({ phone, status, statusType, loading, onPhoneC
         </div>
 
         <div id="demo" className="rounded-[32px] border border-slate-700/70 bg-slate-950/80 p-5 sm:p-6">
-          <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Live lookup demo</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <Input
-              value={phone}
-              onChange={(event) => onPhoneChange(event.target.value)}
-              onKeyDown={(event) => event.key === 'Enter' && !loading && void onLookup()}
-              placeholder="+358401234567"
-              aria-label="Phone number"
-              disabled={loading}
-            />
-            <Button onClick={onLookup} loading={loading} loadingLabel="Looking up..." className="w-full sm:w-auto">
-              Lookup number
-            </Button>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Guided product demo</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">Start with a meaningful outcome, then try a real number.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+                Each scenario preloads an example state so the product story is clear before the user experiments with the live registry.
+              </p>
+            </div>
+            <div
+              className={`max-w-xl rounded-3xl px-4 py-3 text-sm leading-6 ring-1 transition-colors duration-200 ${statusStyles[statusType]}`}
+              role="status"
+              aria-live="polite"
+            >
+              {status}
+            </div>
           </div>
-          <div className={`mt-4 rounded-3xl px-4 py-3 text-sm ring-1 transition-colors duration-200 ${statusStyles[statusType]}`} role="status" aria-live="polite">
-            {status}
+
+          <div className="mt-5 flex items-center justify-between gap-4">
+            <p className="text-xs uppercase tracking-[0.28em] text-slate-500">1. Choose a scenario</p>
+            <p className="text-xs text-slate-500">Click any card to load its number into the lookup field below.</p>
+          </div>
+
+          <div className="mt-4 grid items-stretch gap-3 lg:grid-cols-3">
+            {scenarios.map((scenario) => {
+              const active = selectedScenario === scenario.key
+              const outcomeClasses =
+                scenario.statusType === 'success'
+                  ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-100'
+                  : scenario.statusType === 'info'
+                    ? 'border-amber-500/25 bg-amber-500/10 text-amber-100'
+                    : 'border-slate-700/70 bg-slate-950/80 text-slate-200'
+
+              return (
+                <button
+                  key={scenario.key}
+                  type="button"
+                  onClick={() => onSelectScenario(scenario.key)}
+                  aria-pressed={active}
+                  className={[
+                    'group flex h-full flex-col overflow-hidden rounded-[26px] border px-5 py-5 text-left transition duration-200',
+                    active
+                      ? 'border-sky-400/40 bg-[linear-gradient(180deg,rgba(14,165,233,0.12),rgba(15,23,42,0.88))] shadow-[0_30px_80px_-58px_rgba(14,165,233,0.95)] ring-1 ring-sky-400/15'
+                      : 'border-slate-700/70 bg-slate-900/80 hover:border-slate-500/80 hover:bg-slate-900',
+                  ].join(' ')}
+                >
+                  <div className="flex min-h-[9.5rem] flex-1 flex-col">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">{scenario.eyebrow}</p>
+                      <span
+                        className={[
+                          'inline-flex shrink-0 rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.24em]',
+                          active ? 'border-sky-300/25 bg-sky-400/15 text-sky-100' : 'border-slate-700/70 bg-slate-950/80 text-slate-300',
+                        ].join(' ')}
+                      >
+                        {active ? 'Selected' : 'Scenario'}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-4 text-lg font-semibold leading-6 text-white">{scenario.title}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-6 text-slate-400">{scenario.detail}</p>
+                  </div>
+
+                  <div className="mt-5 space-y-3 border-t border-slate-800/80 pt-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] uppercase tracking-[0.24em] ${outcomeClasses}`}>
+                        {scenario.outcomeLabel}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Fills lookup</span>
+                    </div>
+                    <span className="block text-[11px] uppercase tracking-[0.24em] text-slate-500">Demo number</span>
+                    <span className="block font-mono text-xs text-slate-300">{scenario.phone}</span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 rounded-[28px] border border-slate-700/70 bg-slate-900/70 p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.28em] text-slate-500">2. Run the selected number or try another</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  The selected scenario fills this input automatically. You can still replace it with any other number and run a real lookup.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <Input
+                value={phone}
+                onChange={(event) => onPhoneChange(event.target.value)}
+                onKeyDown={(event) => event.key === 'Enter' && !loading && void onLookup()}
+                placeholder="+358401234567"
+                aria-label="Phone number"
+                disabled={loading}
+              />
+              <Button onClick={onLookup} loading={loading} loadingLabel="Looking up..." className="w-full sm:w-auto">
+                Run live lookup
+              </Button>
+            </div>
           </div>
         </div>
       </div>

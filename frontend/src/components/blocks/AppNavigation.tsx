@@ -1,15 +1,25 @@
-import type { AdminSession, AppView } from '../../lib/types'
+import type { AdminSession, AppView, PortalSession } from '../../lib/types'
 import { Button } from '../ui/Button'
 
 interface AppNavigationProps {
   activeView: AppView
   adminSession: AdminSession | null
+  portalSession: PortalSession | null
   authChecking: boolean
   onChangeView: (view: AppView) => void
   onLogout: () => void
+  onPortalLogout: () => void
 }
 
-export function AppNavigation({ activeView, adminSession, authChecking, onChangeView, onLogout }: AppNavigationProps) {
+export function AppNavigation({
+  activeView,
+  adminSession,
+  portalSession,
+  authChecking,
+  onChangeView,
+  onLogout,
+  onPortalLogout,
+}: AppNavigationProps) {
   const isInternal = activeView === 'internal'
   const isPortal = activeView === 'portal'
 
@@ -51,6 +61,11 @@ export function AppNavigation({ activeView, adminSession, authChecking, onChange
           </nav>
 
           <div className="flex items-center gap-3">
+            {portalSession ? (
+              <div className="hidden rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-100 lg:inline-flex">
+                {portalSession.account.full_name}
+              </div>
+            ) : null}
             {!isPortal ? (
               <a
                 href="#download"
@@ -64,8 +79,13 @@ export function AppNavigation({ activeView, adminSession, authChecking, onChange
               onClick={() => onChangeView('portal')}
               className="rounded-full border border-slate-700/70 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-sky-400/40 hover:text-white"
             >
-              {isPortal ? 'Request access' : 'Portal sign in'}
+              {isPortal ? 'Portal access' : portalSession ? 'Open portal' : 'Portal sign in'}
             </button>
+            {isPortal && portalSession ? (
+              <Button type="button" variant="danger" onClick={onPortalLogout} className="px-4 py-2.5">
+                Sign out
+              </Button>
+            ) : null}
           </div>
         </div>
       </header>
